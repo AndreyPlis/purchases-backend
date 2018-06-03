@@ -12,7 +12,7 @@ data class Purchase(
 
         @ManyToOne(cascade = [(CascadeType.ALL)])
         @JoinColumn(name = "goodId")
-        val good : Good,
+        val good: Good,
 
         @ManyToOne(cascade = [(CascadeType.ALL)])
         @JoinColumn(name = "measureId")
