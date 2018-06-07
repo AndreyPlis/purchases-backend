@@ -5,22 +5,25 @@ import com.purchases.backend.repository.GoodRepository
 import com.purchases.backend.service.GoodService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.*
 
 @Service
 @Transactional
 internal class JpaGoodService(val goodRepository: GoodRepository) : GoodService {
+    override fun deleteAllGoods() {
+        goodRepository.deleteAll()
+    }
 
-    override fun addGood(good: Good) : Good {
+    override fun deleteGood(good: Good) {
+        goodRepository.delete(good);
+    }
+
+    override fun addGood(good: Good): Good {
         return goodRepository.save(good)
     }
 
-    override fun findGood(name: String): Good {
-        val good = goodRepository.findById(name)
-
-        if (!good.isPresent)
-            throw IllegalStateException("not found good-$name")
-
-        return good.get()
+    override fun findGood(name: String): Optional<Good> {
+        return goodRepository.findById(name)
     }
 
     override fun getAllGoods(): List<Good> {

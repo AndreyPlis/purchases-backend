@@ -2,23 +2,31 @@ package com.purchases.backend.controller
 
 import com.purchases.backend.model.Good
 import com.purchases.backend.service.GoodService
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
+
 @RestController
 @RequestMapping("/goods")
-class GoodResource(val goodService: GoodService) {
+class GoodController(val goodService: GoodService) {
 
 
     @GetMapping
+    @ResponseBody
     fun retrieveAllGoods(): List<Good> {
         return goodService.getAllGoods()
     }
 
     @GetMapping("/{name}")
-    fun retrieveGood(@PathVariable name: String): Good {
-        return goodService.findGood(name)
+    @ResponseBody
+    fun retrieveGood(@PathVariable name: String): ResponseEntity<Any> {
+        val goodOptional = goodService.findGood(name)
+        if (goodOptional.isPresent)
+            return ResponseEntity(goodOptional.get(), HttpStatus.OK)
+        else
+            return ResponseEntity.notFound().build()
     }
 
 
@@ -33,19 +41,21 @@ class GoodResource(val goodService: GoodService) {
 
     }
 
-    @PutMapping("/{name}")
-    fun updateGood(@RequestBody good: Good, @PathVariable name: String): ResponseEntity<Any> {
+    @DeleteMapping("/{name}")
+    fun deleteGood(@PathVariable name: String): ResponseEntity<Any> {
+        val goodOptional = goodService.findGood(name)
 
-        /* //fixme
-         val goodOptional = goodRepository!!.findById(name)
+        if (!goodOptional.isPresent)
+            return ResponseEntity.notFound().build()
 
-         if (!goodOptional.isPresent)
-             return ResponseEntity.notFound().build()
+        goodService.deleteGood(goodOptional.get())
 
-         goodOptional.get().name = good.name
+        return ResponseEntity.noContent().build()
+    }
 
-         goodRepository!!.save(goodOptional.get())*/
-
+    @DeleteMapping
+    fun deleteAllGoods(): ResponseEntity<Any> {
+        goodService.deleteAllGoods()
         return ResponseEntity.noContent().build()
     }
 }
