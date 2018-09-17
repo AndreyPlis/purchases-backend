@@ -23,10 +23,11 @@ class GoodController(val goodService: GoodRepository) {
     @ResponseBody
     fun retrieveGood(@PathVariable name: String): ResponseEntity<Any> {
         val goodOptional = goodService.findById(name)
-        if (goodOptional.isPresent)
-            return ResponseEntity(goodOptional.get(), HttpStatus.OK)
+
+        return if (goodOptional.isPresent)
+            ResponseEntity(goodOptional.get(), HttpStatus.OK)
         else
-            return ResponseEntity.notFound().build()
+            ResponseEntity.notFound().build()
     }
 
 
