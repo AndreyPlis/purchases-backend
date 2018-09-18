@@ -1,10 +1,10 @@
 package com.purchases.backend.identity
 
-import com.purchases.backend.model.User
+import com.purchases.backend.model.user.User
 import org.springframework.security.core.authority.AuthorityUtils
 
-class TokenUser//super(user.getUserName(), user.getPassword(), true, true, true, true,  AuthorityUtils.createAuthorityList(user.getRole().toString()));
-(private val user: User) : org.springframework.security.core.userdetails.User(user.name, user.password, AuthorityUtils.createAuthorityList("ADMIN")) {
+class TokenUser
+(private val user: User) : org.springframework.security.core.userdetails.User(user.name, user.password, AuthorityUtils.createAuthorityList(user.role.toString())) {
 
 
     fun getUser(): User {
@@ -12,6 +12,6 @@ class TokenUser//super(user.getUserName(), user.getPassword(), true, true, true,
     }
 
     fun getRole(): String {
-        return "ADMIN";
+        return user.role.toString();
     }
 }

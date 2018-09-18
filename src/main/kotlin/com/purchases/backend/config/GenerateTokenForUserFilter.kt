@@ -3,7 +3,9 @@ package com.purchases.backend.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.purchases.backend.identity.TokenUser
 import com.purchases.backend.identity.TokenUtil
-import jdk.nashorn.internal.runtime.regexp.joni.Config.log
+import com.purchases.backend.model.response.ResponseStatusEnum
+import com.purchases.backend.model.session.SessionItem
+import com.purchases.backend.model.session.SessionResponse
 import org.apache.commons.io.IOUtils
 import org.json.JSONException
 import org.json.JSONObject
@@ -21,7 +23,7 @@ import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
-class GenerateTokenForUserFilter protected constructor(urlMapping: String, authenticationManager: AuthenticationManager, private val tokenUtil: TokenUtil) : AbstractAuthenticationProcessingFilter(AntPathRequestMatcher(urlMapping)) {
+class GenerateTokenForUserFilter(urlMapping: String, authenticationManager: AuthenticationManager, private val tokenUtil: TokenUtil) : AbstractAuthenticationProcessingFilter(AntPathRequestMatcher(urlMapping)) {
 
     init {
         setAuthenticationManager(authenticationManager)
@@ -52,33 +54,18 @@ class GenerateTokenForUserFilter protected constructor(urlMapping: String, authe
     @Throws(IOException::class, ServletException::class)
     override fun successfulAuthentication(req: HttpServletRequest, res: HttpServletResponse, chain: FilterChain?, authToken: Authentication) {
         SecurityContextHolder.getContext().authentication = authToken
-        /*
-        JSONObject jsonResp = new JSONObject();
-        TokenUser tokenUser = (TokenUser)authToken.getPrincipal();
-        String newToken = this.tokenUtil.createTokenForUser(tokenUser);
-
-        jsonResp.put("token",newToken);
-        jsonResp.put("firstName",tokenUser.getUser().getFirstName());
-        jsonResp.put("lastName",tokenUser.getUser().getLastName());
-        jsonResp.put("email",tokenUser.getUser().getEmail());
-        jsonResp.put("role",tokenUser.getRole());
-        */
 
         val tokenUser = authToken.principal as TokenUser
-        val resp = SessionResponse()
         val respItem = SessionItem()
+        val resp = SessionResponse(respItem)
         val ow = ObjectMapper().writer().withDefaultPrettyPrinter()
         val tokenString = this.tokenUtil.createTokenForUser(tokenUser)
 
-        respItem.setFirstName(tokenUser.getUser().getFirstName())
-        respItem.setLastName(tokenUser.getUser().getLastName())
-        respItem.setUserId(tokenUser.getUser().getUserId())
-        respItem.setEmail(tokenUser.getUser().getEmail())
-        respItem.setToken(tokenString)
+        respItem.name = tokenUser.getUser().name
+        respItem.token = tokenString
 
-        resp.setOperationStatus(ResponseStatusEnum.SUCCESS)
-        resp.setOperationMessage("Login Success")
-        resp.setItem(respItem)
+        resp.operationStatus = ResponseStatusEnum.SUCCESS
+        resp.operationMessage = "Login Success"
         val jsonRespString = ow.writeValueAsString(resp)
 
         res.status = HttpServletResponse.SC_OK

@@ -1,8 +1,9 @@
 package com.purchases.backend.identity
 
-import com.purchases.backend.model.User
-import com.sun.org.apache.xml.internal.security.algorithms.SignatureAlgorithm
+import com.purchases.backend.model.user.Role
+import com.purchases.backend.model.user.User
 import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
 import org.springframework.security.core.Authentication
 import org.springframework.stereotype.Service
 import java.util.*
@@ -34,14 +35,8 @@ class TokenUtil {
                 .parseClaimsJws(token)
                 .getBody()
 
-        val user = User()
-        user.name = claims.get("userId") as String
-        user.setRole(Role.valueOf(claims.get("role") as String))
-        return if (user.getUserId() != null && user.getRole() != null) {
-            TokenUser(user)
-        } else {
-            null
-        }
+        val user = User(claims.get("userId") as String, "", Role.valueOf(claims.get("role") as String))
+        return TokenUser(user)
     }
 
     fun createTokenForUser(tokenUser: TokenUser): String {
@@ -51,9 +46,9 @@ class TokenUtil {
     fun createTokenForUser(user: User): String {
         return Jwts.builder()
                 .setExpiration(Date(System.currentTimeMillis() + VALIDITY_TIME_MS))
-                .setSubject(user.getFullName())
-                .claim("userId", user.getUserId())
-                .claim("role", user.getRole().toString())
+                .setSubject(user.name)
+                .claim("userId", user.name)
+                .claim("role", user.role.toString())
                 .signWith(SignatureAlgorithm.HS256, secret)
                 .compact()
     }

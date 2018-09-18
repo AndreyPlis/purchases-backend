@@ -17,7 +17,7 @@ class UserDetailsService : org.springframework.security.core.userdetails.UserDet
     @Throws(UsernameNotFoundException::class, DisabledException::class)
     override fun loadUserByUsername(username: String): TokenUser {
 
-        val user = userRepo!!.findOneByUserId(username).orElseThrow({ UsernameNotFoundException("User not found") })
+        val user = userRepo!!.findOneByName(username).orElseThrow({ UsernameNotFoundException("User not found") })
         val currentUser: TokenUser
         currentUser = TokenUser(user)
         detailsChecker.check(currentUser)
