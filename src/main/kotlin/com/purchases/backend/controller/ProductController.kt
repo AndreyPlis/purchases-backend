@@ -1,7 +1,7 @@
 package com.purchases.backend.controller
 
-import com.purchases.backend.model.Good
-import com.purchases.backend.repository.GoodRepository
+import com.purchases.backend.model.Product
+import com.purchases.backend.repository.ProductRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -9,20 +9,20 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 
 @RestController
-@RequestMapping("/goods")
-class GoodController(val goodService: GoodRepository) {
+@RequestMapping("/products")
+class ProductController(val productService: ProductRepository) {
 
 
     @GetMapping
     @ResponseBody
-    fun retrieveAllGoods(): List<Good> {
-        return goodService.findAll()
+    fun retrieveAllGoods(): List<Product> {
+        return productService.findAll()
     }
 
     @GetMapping("/{name}")
     @ResponseBody
     fun retrieveGood(@PathVariable name: String): ResponseEntity<Any> {
-        val goodOptional = goodService.findById(name)
+        val goodOptional = productService.findById(name)
 
         return if (goodOptional.isPresent)
             ResponseEntity(goodOptional.get(), HttpStatus.OK)
@@ -32,8 +32,8 @@ class GoodController(val goodService: GoodRepository) {
 
 
     @PostMapping
-    fun createGood(@RequestBody good: Good): ResponseEntity<Any> {
-        val newGood = goodService.save(good)
+    fun createGood(@RequestBody product: Product): ResponseEntity<Any> {
+        val newGood = productService.save(product)
 
         val location = ServletUriComponentsBuilder.fromCurrentRequest().path("/{name}")
                 .buildAndExpand(newGood.name).toUri()
@@ -44,19 +44,19 @@ class GoodController(val goodService: GoodRepository) {
 
     @DeleteMapping("/{name}")
     fun deleteGood(@PathVariable name: String): ResponseEntity<Any> {
-        val goodOptional = goodService.findById(name)
+        val goodOptional = productService.findById(name)
 
         if (!goodOptional.isPresent)
             return ResponseEntity.notFound().build()
 
-        goodService.delete(goodOptional.get())
+        productService.delete(goodOptional.get())
 
         return ResponseEntity.noContent().build()
     }
 
     @DeleteMapping
     fun deleteAllGoods(): ResponseEntity<Any> {
-        goodService.deleteAll()
+        productService.deleteAll()
         return ResponseEntity.noContent().build()
     }
 }
