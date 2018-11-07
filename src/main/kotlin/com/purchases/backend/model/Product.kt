@@ -6,10 +6,12 @@ import javax.persistence.*
 @Entity
 data class Product(
         @Id
+        @GeneratedValue(strategy = GenerationType.AUTO)
+        val id: Long,
         val name: String,
         val price: Float,
-        val price_begins_on: Date,
-        val price_ends_on: Date,
+        val price_begins_on: Date?,
+        val price_ends_on: Date?,
 
         @ManyToOne(fetch = FetchType.LAZY)
         @JoinColumn(name = "category_id")

@@ -1,5 +1,6 @@
 package com.purchases.backend.model
 
+import java.util.*
 import javax.persistence.*
 
 @Entity
@@ -8,21 +9,21 @@ data class Category(
         @GeneratedValue(strategy = GenerationType.AUTO)
         val id: Long,
         val name: String,
-        val level: Byte,
+        val level: Int,
 
 
         @ManyToOne(cascade = [(CascadeType.ALL)])
-        @JoinColumn(name = "parentCategory_id")
-        val parentCategory: Category,
+        @JoinColumn(name = "parent_id")
+        val parentCategory: Category?,
 
-        @OneToMany(mappedBy = "parentCategory")
-        val subCategories: Set<Category> = HashSet(),
+        @OneToMany(mappedBy = "parentCategory", fetch = FetchType.EAGER)
+        val subCategories: MutableSet<Category> = mutableSetOf(),
 
 
-        val image: ByteArray,
+        val image: ByteArray?,
 
-        @OneToMany(mappedBy = "product", cascade = [(CascadeType.ALL)])
-        val products: Set<Product> = HashSet()
+        @OneToMany(mappedBy = "category", cascade = [(CascadeType.ALL)])
+        val products: MutableSet<Product> = mutableSetOf()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -35,7 +36,10 @@ data class Category(
         if (level != other.level) return false
         if (parentCategory != other.parentCategory) return false
         if (subCategories != other.subCategories) return false
-        if (!image.contentEquals(other.image)) return false
+        if (image != null) {
+            if (other.image == null) return false
+            if (!image.contentEquals(other.image)) return false
+        } else if (other.image != null) return false
         if (products != other.products) return false
 
         return true
@@ -45,11 +49,11 @@ data class Category(
         var result = id.hashCode()
         result = 31 * result + name.hashCode()
         result = 31 * result + level
-        result = 31 * result + parentCategory.hashCode()
-        result = 31 * result + subCategories.hashCode()
-        result = 31 * result + image.contentHashCode()
-        result = 31 * result + products.hashCode()
+        result = 31 * result + (image?.contentHashCode() ?: 0)
         return result
     }
 
+    override fun toString(): String {
+        return "Category(id=$id, name='$name', level=$level, subCategories=${subCategories.size}, image=${Arrays.toString(image)})"
+    }
 }
