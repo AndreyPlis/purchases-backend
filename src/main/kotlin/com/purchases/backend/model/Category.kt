@@ -1,9 +1,13 @@
 package com.purchases.backend.model
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.annotation.ObjectIdGenerators
 import java.util.*
 import javax.persistence.*
 
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator::class, property = "id")
 data class Category(
         @Id
         @GeneratedValue(strategy = GenerationType.AUTO)
@@ -17,13 +21,15 @@ data class Category(
         val parentCategory: Category?,
 
         @OneToMany(mappedBy = "parentCategory", fetch = FetchType.EAGER)
+
         val subCategories: MutableSet<Category> = mutableSetOf(),
 
 
         val image: ByteArray?,
 
-        @OneToMany(mappedBy = "category", cascade = [(CascadeType.ALL)])
-        val products: MutableSet<Product> = mutableSetOf()
+        @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+        @JsonIgnore
+        val products: MutableList<Product>
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
